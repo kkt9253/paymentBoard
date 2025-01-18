@@ -42,12 +42,12 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
         if (existData.isEmpty()) {
             User user = new User();
-            user.setUsername(username);
             user.setName(oAuth2Response.getName());
             user.setEmail(oAuth2Response.getEmail());
             user.setMobile(oAuth2Response.getMobile());
             user.setBirth_year(oAuth2Response.getBirthYear());
             user.setGender(oAuth2Response.getGender());
+            user.setUsername(username);
             user.setRole(UserRole.GUIDE_CONSUMER);
 
             userRepository.save(user);
@@ -59,6 +59,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
             return new CustomOAuth2User(userDTO);
         }
+        // 존재하더라도 소셜 계정의 정보가 수정될 수 있으니 업데이트
         else {
             existData.get().setName(oAuth2Response.getName());
             existData.get().setEmail(oAuth2Response.getEmail());
