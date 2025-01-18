@@ -24,21 +24,26 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, SecurityException {
 
         CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
+
         String userName = customUserDetails.getUsername();
+
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority authority = iterator.next();
         String role = authority.getAuthority();
 
-        String token = jwtUtil.createJwt(userName, role, 60 * 60 * 24L);
-        response.addCookie(createCookie("Authorization", token));
+        String accessToken = jwtUtil.createJwt("access", userName, role, 10 * 60L);
+        String refreshToken = jwtUtil.createJwt("refresh", userName, role, 36 * 60 * 60L);
+
+        response.setHeader("Authorization", "Bearer " + accessToken);
+        response.addCookie(createCookie("refresh", refreshToken));
         response.sendRedirect("http://localhost:3000/");
     }
 
     private Cookie createCookie(String key, String value) {
 
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(60 * 60 * 24);
+        cookie.setMaxAge(36 * 60 * 60);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
 

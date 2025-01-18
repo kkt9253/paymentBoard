@@ -3,7 +3,7 @@ package graduationtoyproject.paymentboard.config;
 import graduationtoyproject.paymentboard.auth.JwtUtil;
 import graduationtoyproject.paymentboard.auth.oauth.CustomOauth2UserService;
 import graduationtoyproject.paymentboard.auth.oauth.CustomSuccessHandler;
-import graduationtoyproject.paymentboard.auth.oauth.JwtFilter;
+import graduationtoyproject.paymentboard.auth.JwtFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,7 +40,7 @@ public class SecurityConfig {
         );
 
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/").permitAll()
+                .requestMatchers("/", "/reissue").permitAll()
                 .anyRequest().authenticated()
         );
 
