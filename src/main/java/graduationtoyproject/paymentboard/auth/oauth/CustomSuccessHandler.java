@@ -1,7 +1,9 @@
 package graduationtoyproject.paymentboard.auth.oauth;
 
+import graduationtoyproject.paymentboard.auth.CookieUtil;
 import graduationtoyproject.paymentboard.auth.JwtUtil;
-import jakarta.servlet.http.Cookie;
+import graduationtoyproject.paymentboard.domain.entity.RefreshToken;
+import graduationtoyproject.paymentboard.repository.RefreshTokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -19,34 +21,42 @@ import java.util.Iterator;
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtUtil jwtUtil;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final CookieUtil cookieUtil;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, SecurityException {
 
         CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
 
-        String userName = customUserDetails.getUsername();
+        String username = customUserDetails.getUsername();
+
+        System.out.println("로그인 성공 핸들러 호출 : " + username);
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority authority = iterator.next();
         String role = authority.getAuthority();
 
-        String accessToken = jwtUtil.createJwt("access", userName, role, 10 * 60L);
-        String refreshToken = jwtUtil.createJwt("refresh", userName, role, 36 * 60 * 60L);
+        System.out.println("role: " + role);
+
+        String accessToken = jwtUtil.createJwt("access", username, role, 10 * 60L);
+        String refreshToken = jwtUtil.createJwt("refresh", username, role, 36 * 60 * 60L);
+
+        addRefreshToken(username, refreshToken);
+
+        System.out.println("accessToken: " + accessToken);
+        System.out.println("refreshToken: " + refreshToken);
 
         response.setHeader("Authorization", "Bearer " + accessToken);
-        response.addCookie(createCookie("refresh", refreshToken));
+        response.addCookie(cookieUtil.createCookie("refresh", refreshToken, 36 * 60 * 60));
         response.sendRedirect("http://localhost:3000/");
     }
 
-    private Cookie createCookie(String key, String value) {
+    private void addRefreshToken(String username, String refreshToken) {
 
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(36 * 60 * 60);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
+        RefreshToken refreshTokenEntity = new RefreshToken(username, refreshToken);
 
-        return cookie;
+        refreshTokenRepository.save(refreshTokenEntity);
     }
 }

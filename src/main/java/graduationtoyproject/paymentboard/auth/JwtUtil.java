@@ -1,6 +1,8 @@
 package graduationtoyproject.paymentboard.auth;
 
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -39,16 +41,33 @@ public class JwtUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
-    public String createJwt(String category, String username, String role, Long expiredMs) {
+    public String createJwt(String category, String username, String role, Long expiredS) {
+
+        System.out.println("createJwt - category:" + category + " username:" + username + " role:" + role + " expired:" + expiredS);
 
         return Jwts.builder()
                 .claim("category", category)
                 .claim("username", username)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + (expiredMs * 1000)))
+                .expiration(new Date(System.currentTimeMillis() + (expiredS * 1000)))
                 .signWith(secretKey)
                 .compact();
     }
 
+    public String getRefreshToken(HttpServletRequest request) {
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            throw new IllegalArgumentException("No cookies found in the request");
+        }
+
+        for (Cookie cookie : cookies) {
+            if ("refresh".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+
+        return null;
+    }
 }
