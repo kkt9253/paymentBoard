@@ -27,16 +27,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String accessToken = request.getHeader("Authorization");
 
-        System.out.println("Authorization 헤더: " + accessToken);
-
         if (accessToken == null || !accessToken.startsWith("Bearer ")) {
 
-            System.out.println("JWT Filter: Missing or invalid Authorization header");
             filterChain.doFilter(request, response);
-
-            // 위에 있을 땐 오류 났음
-            //response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            //response.getWriter().write("Invalid Authorization header");
 
             return;
         }
@@ -45,14 +38,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
             jwtUtil.isExpired(token);
-            System.out.println("JWT Filter: Token valid");
         }
         catch (ExpiredJwtException e) {
             PrintWriter writer = response.getWriter();
             writer.print("access token expired");
-
-            System.out.println("JWT Filter: Error during token validation - " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
             return;
         }
 
@@ -72,7 +63,7 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private void setAuthenticationContext(String token) {
-        System.out.println("JWT Filter: setAuthenticationContext");
+
         String username = jwtUtil.getUsername(token);
         String role = jwtUtil.getRole(token);
 
@@ -82,9 +73,7 @@ public class JwtFilter extends OncePerRequestFilter {
         // nullPointerException
         userDTO.setRole(UserRole.valueOf(role));
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(userDTO);
-
         Authentication authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
-        System.out.println("JWT Filter: SecurityContextHolder");
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 }

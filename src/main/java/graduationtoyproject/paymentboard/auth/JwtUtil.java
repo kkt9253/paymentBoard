@@ -43,8 +43,6 @@ public class JwtUtil {
 
     public String createJwt(String category, String username, String role, Long expiredS) {
 
-        System.out.println("createJwt - category:" + category + " username:" + username + " role:" + role + " expired:" + expiredS);
-
         return Jwts.builder()
                 .claim("category", category)
                 .claim("username", username)

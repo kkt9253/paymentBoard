@@ -23,22 +23,16 @@ public class SocialLoginService {
 
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
 
-        System.out.println("reissue 실행");
-
         String refreshToken = jwtUtil.getRefreshToken(request);
 
-        System.out.println("reissue-refreshToken: " + refreshToken);
-
         if (refreshToken == null) {
-            System.out.println("reissue-refreshToken == null");
+
             return ResponseEntity.badRequest().body("refresh token is null");
         }
 
         try {
             jwtUtil.isExpired(refreshToken);
-            System.out.println("reissue-refreshToken valid");
         } catch (ExpiredJwtException e) {
-            System.out.println("reissue-refreshToken expired");
             return ResponseEntity.badRequest().body(e.getMessage());
         }
 
@@ -50,9 +44,6 @@ public class SocialLoginService {
         String username = jwtUtil.getUsername(refreshToken);
         String role = jwtUtil.getRole(refreshToken);
 
-        System.out.println("reissue-username: " + username);
-        System.out.println("reissue-role: " + role);
-
         String newAccessToken = jwtUtil.createJwt("access", username, role, 10 * 60L);
         String newRefreshToken = jwtUtil.createJwt(refreshToken, username, role, 36 * 60 * 60L);
 
@@ -60,8 +51,6 @@ public class SocialLoginService {
 
         response.setHeader("Authorization", "Bearer " + newAccessToken);
         response.addCookie(cookieUtil.createCookie("refresh", newRefreshToken, 36 * 60 * 60));
-
-        System.out.println("성공적인 access/refresh token 재발급");
 
         return ResponseEntity.ok(newAccessToken);
     }

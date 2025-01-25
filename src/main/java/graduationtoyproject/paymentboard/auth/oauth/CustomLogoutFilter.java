@@ -33,9 +33,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
     private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-        System.out.println("logout 호출 start");
         String requestURI = request.getRequestURI();
-        System.out.println(requestURI);
         if (!requestURI.matches("^/logout$")) {
 
             filterChain.doFilter(request, response);
@@ -70,8 +68,6 @@ public class CustomLogoutFilter extends GenericFilterBean {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-
-        System.out.println("logout 호출 end");
 
         refreshTokenRepository.deleteByRefreshToken(refreshToken);
 

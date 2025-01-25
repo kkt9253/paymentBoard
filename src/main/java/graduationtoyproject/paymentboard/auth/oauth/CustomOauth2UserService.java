@@ -22,9 +22,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
-        System.out.println("CustomOauth2UserService 호출");
         OAuth2User oAuth2User = super.loadUser(userRequest);
-        System.out.println("네이버 사용자 정보: " + oAuth2User.getAttributes());
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 

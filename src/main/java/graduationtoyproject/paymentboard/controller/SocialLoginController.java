@@ -24,8 +24,6 @@ public class SocialLoginController {
     @GetMapping("/test")
     public ResponseEntity<String> test(HttpServletRequest request) {
 
-        System.out.println("test 실행: " + request.getHeader("Authorization"));
-
         return ResponseEntity.ok("login test page");
     }
 
