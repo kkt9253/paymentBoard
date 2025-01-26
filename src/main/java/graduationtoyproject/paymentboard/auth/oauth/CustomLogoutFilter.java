@@ -22,8 +22,8 @@ import java.util.Optional;
 public class CustomLogoutFilter extends GenericFilterBean {
 
     private final JwtUtil jwtUtil;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final CookieUtil cookieUtil;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
@@ -41,7 +41,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
             return;
         }
 
-        String refreshToken = jwtUtil.getRefreshToken(request);
+        String refreshToken = cookieUtil.getCookieValue(request, "refresh");
 
         if (refreshToken == null) {
 

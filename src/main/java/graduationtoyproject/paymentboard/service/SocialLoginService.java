@@ -25,11 +25,11 @@ public class SocialLoginService {
 
         System.out.println("reissue2 실행");
 
-        String refreshToken = jwtUtil.getRefreshToken(request);
+        String refreshToken = cookieUtil.getCookieValue(request, "refresh");
 
         if (refreshToken == null) {
 
-            return ResponseEntity.badRequest().body("refresh token is null");
+            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body("refresh token is null");
         }
 
         try {
@@ -40,7 +40,7 @@ public class SocialLoginService {
 
         String category = jwtUtil.getCategory(refreshToken);
         if (!category.equals("refresh") && !validateRefreshToken(jwtUtil.getUsername(refreshToken), refreshToken)) {
-            return ResponseEntity.badRequest().body("refresh token is invalid");
+            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body("refresh token is invalid");
         }
 
         String username = jwtUtil.getUsername(refreshToken);

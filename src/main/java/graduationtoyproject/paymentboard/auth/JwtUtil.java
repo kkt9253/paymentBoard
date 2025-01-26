@@ -52,17 +52,4 @@ public class JwtUtil {
                 .signWith(secretKey)
                 .compact();
     }
-
-    public String getRefreshToken(HttpServletRequest request) {
-
-        Cookie[] cookies = request.getCookies();
-
-        for (Cookie cookie : cookies) {
-            if ("refresh".equals(cookie.getName())) {
-                return cookie.getValue();
-            }
-        }
-
-        return null;
-    }
 }
