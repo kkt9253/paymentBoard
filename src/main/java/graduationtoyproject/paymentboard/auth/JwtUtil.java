@@ -56,9 +56,6 @@ public class JwtUtil {
     public String getRefreshToken(HttpServletRequest request) {
 
         Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            throw new IllegalArgumentException("No cookies found in the request");
-        }
 
         for (Cookie cookie : cookies) {
             if ("refresh".equals(cookie.getName())) {

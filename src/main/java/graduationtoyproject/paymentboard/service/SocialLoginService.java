@@ -23,6 +23,8 @@ public class SocialLoginService {
 
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
 
+        System.out.println("reissue2 실행");
+
         String refreshToken = jwtUtil.getRefreshToken(request);
 
         if (refreshToken == null) {

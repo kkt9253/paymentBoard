@@ -33,14 +33,9 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
     private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-        String requestURI = request.getRequestURI();
-        if (!requestURI.matches("^/logout$")) {
+        System.out.println("CustomLogoutFilter 실행");
 
-            filterChain.doFilter(request, response);
-            return;
-        }
-        String requestMethod = request.getMethod();
-        if (!requestMethod.equals("GET")) {
+        if (!isLogoutRequest(request)) {
 
             filterChain.doFilter(request, response);
             return;
@@ -50,7 +45,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
         if (refreshToken == null) {
 
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
@@ -58,14 +53,15 @@ public class CustomLogoutFilter extends GenericFilterBean {
             jwtUtil.isExpired(refreshToken);
         } catch (ExpiredJwtException e) {
 
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
+        String username = jwtUtil.getUsername(refreshToken);
         String category = jwtUtil.getCategory(refreshToken);
-        if (!category.equals("refresh") && !validateRefreshToken(jwtUtil.getUsername(refreshToken), refreshToken)) {
+        if (!category.equals("refresh") && !validateRefreshToken(username, refreshToken)) {
 
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
@@ -74,6 +70,13 @@ public class CustomLogoutFilter extends GenericFilterBean {
         Cookie cookie = cookieUtil.createCookie("refresh", null, 0);
         response.addCookie(cookie);
         response.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    private boolean isLogoutRequest(HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        String requestMethod = request.getMethod();
+
+        return requestURI.matches("^/logout$") && requestMethod.equals("GET");
     }
 
     private boolean validateRefreshToken(String username, String refreshToken) {
