@@ -30,7 +30,6 @@ public class SocialLoginController {
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
 
-        System.out.println("reissue1 실행");
         return socialLoginService.reissue(request, response);
     }
 }

@@ -23,8 +23,6 @@ public class SocialLoginService {
 
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
 
-        System.out.println("reissue2 실행");
-
         String refreshToken = cookieUtil.getCookieValue(request, "refresh");
 
         if (refreshToken == null) {
@@ -65,7 +63,7 @@ public class SocialLoginService {
 
     private void updateRefreshEntity(String username, String refreshToken) {
 
-        refreshTokenRepository.deleteByRefreshToken(refreshToken);
+        refreshTokenRepository.deleteById(username);
 
         refreshTokenRepository.save(new RefreshToken(username, refreshToken));
     }

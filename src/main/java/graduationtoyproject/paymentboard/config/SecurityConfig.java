@@ -54,7 +54,7 @@ public class SecurityConfig {
 
         http.addFilterAfter(new JwtFilter(jwtUtil), OAuth2LoginAuthenticationFilter.class);
 
-        http.addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshTokenRepository, cookieUtil), LogoutFilter.class);
+        http.addFilterBefore(new CustomLogoutFilter(jwtUtil, cookieUtil, refreshTokenRepository), LogoutFilter.class);
 
         http.oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig

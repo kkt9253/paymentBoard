@@ -33,8 +33,6 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
     private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-        System.out.println("CustomLogoutFilter 실행");
-
         if (!isLogoutRequest(request)) {
 
             filterChain.doFilter(request, response);
@@ -65,7 +63,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
             return;
         }
 
-        refreshTokenRepository.deleteByRefreshToken(refreshToken);
+        refreshTokenRepository.deleteById(username);
 
         Cookie cookie = cookieUtil.createCookie("refresh", null, 0);
         response.addCookie(cookie);
