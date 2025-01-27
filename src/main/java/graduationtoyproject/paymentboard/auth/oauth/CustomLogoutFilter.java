@@ -1,10 +1,7 @@
 package graduationtoyproject.paymentboard.auth.oauth;
 
 import graduationtoyproject.paymentboard.auth.CookieUtil;
-import graduationtoyproject.paymentboard.auth.JwtUtil;
-import graduationtoyproject.paymentboard.domain.entity.RefreshToken;
-import graduationtoyproject.paymentboard.repository.RefreshTokenRepository;
-import io.jsonwebtoken.ExpiredJwtException;
+import graduationtoyproject.paymentboard.auth.RefreshTokenHelper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -16,14 +13,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @AllArgsConstructor
 public class CustomLogoutFilter extends GenericFilterBean {
 
-    private final JwtUtil jwtUtil;
+    private final RefreshTokenHelper refreshTokenHelper;
     private final CookieUtil cookieUtil;
-    private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
@@ -41,29 +36,20 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
         String refreshToken = cookieUtil.getCookieValue(request, "refresh");
 
-        if (refreshToken == null) {
-
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-
         try {
-            jwtUtil.isExpired(refreshToken);
-        } catch (ExpiredJwtException e) {
+            refreshTokenHelper.validateRefreshToken(refreshToken);
+        } catch (IllegalStateException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        if (!refreshTokenHelper.isExistRefreshToken(refreshToken)) {
 
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        String username = jwtUtil.getUsername(refreshToken);
-        String category = jwtUtil.getCategory(refreshToken);
-        if (!category.equals("refresh") && !validateRefreshToken(username, refreshToken)) {
-
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-
-        refreshTokenRepository.deleteById(username);
+        refreshTokenHelper.deleteRefreshToken(refreshToken);
 
         Cookie cookie = cookieUtil.createCookie("refresh", null, 0);
         response.addCookie(cookie);
@@ -71,15 +57,11 @@ public class CustomLogoutFilter extends GenericFilterBean {
     }
 
     private boolean isLogoutRequest(HttpServletRequest request) {
+
         String requestURI = request.getRequestURI();
         String requestMethod = request.getMethod();
 
         return requestURI.matches("^/logout$") && requestMethod.equals("GET");
     }
 
-    private boolean validateRefreshToken(String username, String refreshToken) {
-
-        Optional<RefreshToken> existRefreshToken = refreshTokenRepository.findById(username);
-        return existRefreshToken.isPresent() && refreshToken.equals(existRefreshToken.get().getRefreshToken());
-    }
 }

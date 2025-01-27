@@ -39,14 +39,14 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String accessToken = jwtUtil.createJwt("access", username, role, 10 * 60L);
         String refreshToken = jwtUtil.createJwt("refresh", username, role, 36 * 60 * 60L);
 
-        addRefreshToken(username, refreshToken);
+        saveRefreshEntity(username, refreshToken);
 
         response.setHeader("Authorization", "Bearer " + accessToken);
         response.addCookie(cookieUtil.createCookie("refresh", refreshToken, 36 * 60 * 60));
         response.sendRedirect("http://localhost:3000/");
     }
 
-    private void addRefreshToken(String username, String refreshToken) {
+    private void saveRefreshEntity(String username, String refreshToken) {
 
         RefreshToken refreshTokenEntity = new RefreshToken(username, refreshToken);
         refreshTokenRepository.save(refreshTokenEntity);

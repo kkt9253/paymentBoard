@@ -3,7 +3,6 @@ package graduationtoyproject.paymentboard.auth;
 import graduationtoyproject.paymentboard.auth.oauth.CustomOAuth2User;
 import graduationtoyproject.paymentboard.domain.UserRole;
 import graduationtoyproject.paymentboard.domain.dto.UserDTO;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,11 +11,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
+@Component
 @AllArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -36,10 +37,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String token = accessToken.split(" ")[1];
 
-        try {
-            jwtUtil.isExpired(token);
-        }
-        catch (ExpiredJwtException e) {
+        if (jwtUtil.isExpired(token)) {
+
             PrintWriter writer = response.getWriter();
             writer.print("access token expired");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

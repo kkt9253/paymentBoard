@@ -2,11 +2,11 @@ package graduationtoyproject.paymentboard.config;
 
 import graduationtoyproject.paymentboard.auth.CookieUtil;
 import graduationtoyproject.paymentboard.auth.JwtUtil;
+import graduationtoyproject.paymentboard.auth.RefreshTokenHelper;
 import graduationtoyproject.paymentboard.auth.oauth.CustomLogoutFilter;
 import graduationtoyproject.paymentboard.auth.oauth.CustomOauth2UserService;
 import graduationtoyproject.paymentboard.auth.oauth.CustomSuccessHandler;
 import graduationtoyproject.paymentboard.auth.JwtFilter;
-import graduationtoyproject.paymentboard.repository.RefreshTokenRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,8 +29,8 @@ public class SecurityConfig {
     private final CustomOauth2UserService customOauth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
     private final JwtUtil jwtUtil;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final CookieUtil cookieUtil;
+    private final RefreshTokenHelper refreshTokenHelper;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -54,7 +54,7 @@ public class SecurityConfig {
 
         http.addFilterAfter(new JwtFilter(jwtUtil), OAuth2LoginAuthenticationFilter.class);
 
-        http.addFilterBefore(new CustomLogoutFilter(jwtUtil, cookieUtil, refreshTokenRepository), LogoutFilter.class);
+        http.addFilterBefore(new CustomLogoutFilter(refreshTokenHelper, cookieUtil), LogoutFilter.class);
 
         http.oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
